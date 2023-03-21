@@ -45,13 +45,12 @@ def clean_text(text):
 
 if __name__ == '__main__':
     file_name = 'cit_post'
+    IS_EXCEL = False
 
     with open(f"data/{file_name}.txt", "r", encoding="utf-8") as file:
         text = file.read()
 
     result = clean_text(text)
-
-    IS_EXCEL = True
 
     for ii, item in enumerate(result):
         if IS_EXCEL:
