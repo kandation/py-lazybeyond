@@ -43,23 +43,26 @@ def clean_text(text):
     return result
 
 
-with open("data/ddb_pre.txt", "r", encoding="utf-8") as file:
-    text = file.read()
+if __name__ == '__main__':
+    file_name = 'cit_post'
 
-result = clean_text(text)
+    with open(f"data/{file_name}.txt", "r", encoding="utf-8") as file:
+        text = file.read()
 
-IS_EXCEL = True
+    result = clean_text(text)
 
-for ii, item in enumerate(result):
-    if IS_EXCEL:
-        print(f'{ii+1}\t{item["question"]}', end='\t')
-    else:
-        print(f"Question {ii + 1}: {item['question']}")
+    IS_EXCEL = True
 
-    for letter, choice in reversed(item['choices'].items()):
+    for ii, item in enumerate(result):
         if IS_EXCEL:
-            print(f"{letter}. {choice}", end='\t')
+            print(f'{ii + 1}\t{item["question"]}', end='\t')
         else:
-            print(f"{letter}. {choice}")
+            print(f"Question {ii + 1}: {item['question']}")
 
-    print()
+        for letter, choice in reversed(item['choices'].items()):
+            if IS_EXCEL:
+                print(f"{letter}. {choice}", end='\t')
+            else:
+                print(f"{letter}. {choice}")
+
+        print()
