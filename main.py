@@ -18,8 +18,13 @@ if __name__ == '__main__':
     > Run script GGEZ
     """
 
+    # ---- Config Zone ----- #
     # Recommended: Use Cookie browser [see manual at convert_browser_cookies]
     credential_type = CredencialType.USE_BROWSER_COOKIE
+    # Course Index at home page start index=0
+    course_index = 0
+
+    # ---- End Config Zone ---- #
 
     print('Login type:: ', credential_type)
 
@@ -52,7 +57,7 @@ if __name__ == '__main__':
     > Start(uri)
     > ViewCourse(uri): [resultId]
     '''
-    task_id, result_uri = bx.get_task_by_index(0)
+    task_id, result_uri = bx.get_task_by_index(course_index)
     print(f'TaskId {task_id} , URI  {result_uri}')
 
     bx.get_start()
@@ -71,7 +76,6 @@ if __name__ == '__main__':
     pprint(sel_items)
 
     show('==== Learn ====')
-
 
     for d in sel_items:
         print(d)
