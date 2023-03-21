@@ -1,30 +1,29 @@
 import json
 import random
 from time import sleep
+
+import requests
 import urllib3
-from colored import fg, bg, attr
+
+from utils import show
 
 urllib3.disable_warnings()
 
 
-def show(*text):
-    print(f'{bg(1)}', text)
-
-
 class LazyLearnResource:
-    def __init__(self, item_id):
+    def __init__(self, item_id, session: requests.Session()):
         self.item_id = item_id
-        self.__duration_need = 100
+        self.__duration_need = 10
         self.__duration_maxa = 0
         self.__duration_curr = 0
         self.__duration_skip = 10
         self.__item_data = {}
         self.__select_data_x = {}
         self.__view_gateway = None
+        self.__session = session
 
-        self.__lazy_cookie = {
-            'Cookie':'ASP.NET_SessionId=wf1ahfw5sj1jogfz3sxy0dec; G_ENABLED_IDPS=google; __AntiXsrfToken=ea170191fe40417b9c307fbcf404e912; .AspNet.ApplicationCookie=H8P6P1rkDBiTv3ZEgzgOXV-GHO9gGvcBD9H0gkFVoWYNk-Q8cAdAMgCfO2wNhA3gfmZyDBgz12fvlqDuDJKRE3Nj5OjKb3AHg4CCfHly_Y3FKcC1fiyvJF66WHDM89BKzrvHWXFHutQ1QC8T8Fb36L_YE4fQ0GDDCc-1IP3x2k4AqQ_lBc20RNrlQ1dki5MWsorEapgrv9N1rzznPN2jIwFhzl00PxZbNr9bQOsADGCN8MvrVqgPiGscnDoREYlPZV4gBj3avgfEPZrYHFn3qLNe5qb0H3uD8jW7G2sW2XwYNTB1KlwdiF-3Sr0AXqn8M-J8ME1otaE5kZhTRco9jfGfqbLRETpWpfLC2cUTmNIL6niHIa9PR_8KJMQ52lr6BGn8ONFtpFOBfv1tXouaEQZT23gP7eCdRb7vIvxzHp1cGYz7jQkUO0rly011lOWi5zjm4EFhXQEu6AJAcgDzS448YA2YBaFu49AeF-wmmfL8GN4S67YETgpsCWonF7N7N3pe7ClMwPe84o1wwmPC4VjuxIat8O75rZtWQ2dtsKxdATJRJuiIOyYCGO4YlKoCyB3q3k535RaaHSlQ4oc1y6ewdRnbDg5Ro9qpdPNj8AzW1kvgWuRlSM9nS9_FIyQ58_vJXcw5Cyw_llotVHIWpnXIl91_vsqI86U-fcHhe7Ru4U-KUmUtNGEaDs5ZQzDg2jeOBA'
-        }
+    def set_duration_need(self, dur_sec:int):
+        self.__duration_need = dur_sec
 
     def cal_duration(self):
         _data = self.__item_data.get('Result', {})
@@ -61,8 +60,6 @@ class LazyLearnResource:
         return is_close
 
     def __get_view_gateway(self, data):
-        import requests
-
         url = f"https://vcubelms.com/beyondtrainingplus/Course/{data}"
         print(url)
 
@@ -83,17 +80,14 @@ class LazyLearnResource:
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"'
         }
-        headers.update(self.__lazy_cookie)
 
-        response = requests.request("GET", url, headers=headers, data=payload, verify=False)
+        response = self.__session.request("GET", url, headers=headers, data=payload, verify=False)
         print(f'View Gateway Activate: [status_code={response.status_code}]')
         print(response.url)
         for i, h in enumerate(response.history):
             print(f'h_{str(i).zfill(2)}', h.url)
 
     def get_result(self):
-        import requests
-
         url = "https://vcubelms.com/beyondtrainingplus/WebService/Course/CourseVideoService.asmx/GetResult"
 
         payload = f'{{"resultItemId":"{self.item_id}"}}'
@@ -114,9 +108,8 @@ class LazyLearnResource:
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"'
         }
-        headers.update(self.__lazy_cookie)
 
-        response = requests.request("POST", url, headers=headers, data=payload, verify=False)
+        response = self.__session.request("POST", url, headers=headers, data=payload, verify=False)
 
         try:
             self.__item_data = response.json()
@@ -128,9 +121,7 @@ class LazyLearnResource:
 
         print(self.__item_data)
 
-    def set_dur(self):
-        import requests
-
+    def send_fake_learn_duration(self):
         url = "https://vcubelms.com/beyondtrainingplus/WebService/Course/CourseVideoService.asmx/SetVideoDurationSec"
 
         payload = f'{{"resultItemId":"{self.item_id}","durationIntervalSec":{self.__duration_need}}}'
@@ -151,15 +142,11 @@ class LazyLearnResource:
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"'
         }
-        headers.update(self.__lazy_cookie)
-
-        response = requests.request("POST", url, headers=headers, data=payload, verify=False)
+        response = self.__session.request("POST", url, headers=headers, data=payload, verify=False)
 
         print(response.text)
 
     def select(self):
-        import requests
-
         url = "https://vcubelms.com/beyondtrainingplus/WebService/Course/CourseService.asmx/Select"
 
         payload = f'{{"resultItemId":"{self.item_id}"}}'
@@ -180,42 +167,10 @@ class LazyLearnResource:
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"'
         }
-        headers.update(self.__lazy_cookie)
 
-        response = requests.request("POST", url, headers=headers, data=payload, verify=False, allow_redirects=False)
+        response = self.__session.request("POST", url, headers=headers, data=payload, verify=False,
+                                          allow_redirects=False)
         print(response.url)
 
         self.__select_data_x = response.json().get('Result')
         print(self.__select_data_x)
-
-
-if __name__ == '__main__':
-    with open('data/0201.json', encoding='utf8', mode='r') as fo:
-        data = json.loads(fo.read())
-
-    for d in data:
-        print(d)
-        item_id = d.get('ResultItemId')
-        item_type = d.get('Type')
-
-        learn = LazyLearnResource(item_id)
-
-        show('-----------Select--------------')
-        learn.select()
-        print('-------CHeck------')
-        learn.check_result()
-
-        if item_type == 4:
-            show('------RESULT--------')
-            learn.get_result()
-            show('--------DUR-------')
-            cal = learn.cal_duration()
-            skip_times = cal.get('skip')
-            show(f'>> Skip {skip_times}')
-            for ir in range(skip_times):
-                learn.set_dur()
-
-        slz_time = random.randrange(0, 2) + random.random()
-        print('Sleep', slz_time)
-        sleep(slz_time)
-        print('-' * 50)
