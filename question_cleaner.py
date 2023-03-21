@@ -43,7 +43,7 @@ def clean_text(text):
     return result
 
 
-with open("data/q01_1.txt", "r", encoding="utf-8") as file:
+with open("data/ddb_pre.txt", "r", encoding="utf-8") as file:
     text = file.read()
 
 result = clean_text(text)

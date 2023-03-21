@@ -79,7 +79,7 @@ if __name__ == '__main__':
         item_type = d.get('Type')
 
         learn = LazyLearnResource(item_id, r_session)
-        learn.set_duration_need(10)
+        learn.set_duration_need(100)
 
         show('-----------Select--------------')
         learn.select()
