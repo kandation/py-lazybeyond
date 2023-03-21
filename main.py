@@ -93,8 +93,11 @@ if __name__ == '__main__':
             cal = learn.cal_duration()
             skip_times = cal.get('skip')
             show(f'>> Skip {skip_times}')
+
             for ir in range(skip_times):
                 learn.send_fake_learn_duration()
+                slz_dur = random.random()
+                sleep(slz_dur)
 
         slz_time = random.randrange(0, 2) + random.random()
         print('Sleep', slz_time)
